@@ -1,45 +1,51 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"gameoflife/game/game_logic"
 	"log"
+	"os"
 
-	"github.com/mattn/go-tty"
+	"golang.org/x/term"
 )
 
 func main() {
-	tty, err := tty.Open()
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	defer tty.Close()
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-	fmt.Println("Hello, this is an implementation of game of life. You can setup the board before pressing \"Enter\" To start.")
-
-	r := 0
+	display_game(0, oldState)
+	scanner := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Print("\033[H\033[2J")
-		game_logic.PrintBoard(5, 5)
-
-		if r == 'q' {
-			fmt.Println("Quitting game")
-			break
-		}
-
-		if r != 0 {
-			fmt.Printf("You pressed: %d", r)
-		}
-
-		char, err := tty.ReadRune()
-
-		r = int(char)
+		char, _, err := scanner.ReadRune()
 
 		if err != nil {
+			fmt.Println(err)
 			log.Fatal(err)
+			panic(err)
 		}
+
+		display_game(char, oldState)
+	}
+}
+
+func display_game(char rune, oldState *term.State) {
+	if char == 3 {
+		fmt.Println("\r\nFound some Ctrl+C\r")
+		term.Restore(int(os.Stdin.Fd()), oldState)
+		os.Exit(0)
+	} else {
+		fmt.Print("\033[H\033[2J\r")
+		game_logic.PrintBoard(5, 5)
+		if char != 0 {
+			fmt.Printf("Selected char: %v \r\n", char)
+		}
+		fmt.Print("Getting new char")
 	}
 }
