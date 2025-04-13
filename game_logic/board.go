@@ -1,16 +1,39 @@
 package game_logic
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func PrintBoard(x, y int8) {
-	var i int8 = 0
-	var j int8 = 0
-
-	for i = 0; i < x; i++ {
-		for j = 0; j < y; j++ {
-			fmt.Print("[ ] ")
+func PrintBoard(gameSquares [][]bool) {
+	for y, row := range gameSquares {
+		for x, _ := range row {
+			if gameSquares[x][y] {
+				fmt.Print("[X] ")
+			} else {
+				fmt.Print("[ ] ")
+			}
 		}
 
 		fmt.Print("\r\n")
 	}
+}
+
+func FlipBoardSquare(gameSquares [][]bool, x int8, y int8) {
+	gameSquares[x][y] = !gameSquares[x][y]
+}
+
+func InitializeGameState(boardSize int8) [][]bool {
+	var gameSquares = [][]bool{}
+	var i int8
+
+	//Initialize rows
+	for i = 0; i < boardSize; i++ {
+		row := make([]bool, boardSize)
+
+		fmt.Println(len(row))
+
+		gameSquares = append(gameSquares, row)
+	}
+
+	return gameSquares
 }
